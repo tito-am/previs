@@ -1,1 +1,1 @@
-from previs import nearest_point_latlon
+import previs
