@@ -108,9 +108,18 @@ def cmc_download(date,d1,modele='regional',emission='12',variable_level='WIND_TG
     os.chdir(parent_dir)
     os.chdir(d1)
         
-#cmc_download(date,d1,emission='00')
-#cmc_download(date,d1,emission='00',variable_level='TMP_TGL_2')
-#cmc_download(date,d1,emission='00',variable_level='WDIR_TGL_10')
+cmc_download(date,d1,emission='00',variable_level='WIND_TGL_10')
+cmc_download(date,d1,emission='00',variable_level='TMP_TGL_2')
+cmc_download(date,d1,emission='00',variable_level='WDIR_TGL_10')
 cmc_download(date,d1,emission='00',variable_level='APCP_SFC_0')
 cmc_download(date,d1,emission='00',variable_level='TCDC_SFC_0')
-cmc_download(date,d1,emission='00',variable_level='DPT_TGL_2')
+cmc_download(date,d1,emission='00',variable_level='DPT_TGL_2')#dewpoint temperature
+#il manque le type et la probabilité de précipitation
+#•	La valeur de la colonne matrice scribe  TST (température).
+#•	La valeur de la colonne matrice scribe  CLD (nébulosité).
+#•	La valeur de la colonne matrice scribe  P06 (probabilités précipitations aux 6 heures).
+#•	La valeur de la colonne matrice scribe  QPS (quantités précipitations).
+#•	La valeur de la colonne matrice scribe  TYP (types précipitations).
+#•	La valeur de la colonne matrice scribe  DD (direction du vent).
+#•	La valeur de la colonne matrice scribe  FF (vitesse du vent).
+#•	La valeur de la colonne matrice scribe  DPD (écart entre la température et le point de rosée)

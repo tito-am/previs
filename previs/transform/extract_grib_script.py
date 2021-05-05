@@ -143,8 +143,3 @@ def menage_grib():
 # chmod +x extract_grib_script.py  
 # /Users/caramelo/anaconda3/envs/test_xesmf/bin/python extract_grib_script.py
 #grib download
-import requests
-import urllib.request
-import time
-from bs4 import BeautifulSoup
-import os               
