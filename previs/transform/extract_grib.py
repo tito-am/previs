@@ -71,7 +71,7 @@ def lecture_grib(grib_list_total,var_meteo):
     return dr_out
     
 
-def calcul_par_station(lat, lon, nomstn, oaci):    
+def calcul_par_station(dr_out,lat, lon, nomstn, oaci):    
     varmeteo1d = dr_out.sel(latitude=lat, longitude=lon,method='nearest')
     df = varmeteo1d.reset_coords(drop=True).to_dataframe()
     df['nom_station'] = nomstn
@@ -84,53 +84,7 @@ def menage_grib():
         
     for f in glob.glob("*.idx"):
         os.remove(f)
-
-
-
-sysDate = datetime.now()
-curSysDate = (str(sysDate))
-dateStr = sysDate.strftime("%Y%m%d")
-
-#CMC_reg_WIND_TGL_10_ps10km_2021042106_P000
-os.chdir('/Users/caramelo/Documents/00_HQ/01_Prevision_Demande/scribe_download/gem/RDPS/GRIBS/')#ce code peut être utilisé dans n'importe quel dossier, le if à la fin peut traiter les variables
-
-grib_list_total_wind_12=sorted(glob.glob('*_WIND_*12_P*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_wind_12)
-grib_list_total_tmp_12=sorted(glob.glob('*_TMP_*12_P*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_tmp_12)
-grib_list_total_wdir_12=sorted(glob.glob('*_WDIR_*12_P*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_wdir_12)
-
-coords_stations=pd.read_csv('/Users/caramelo/Documents/GitHub/cmc/Stations matrice scribe.csv')
-
-#bloc pour voir si les fichiers sont présents
-
-if grib_list_total_wind_12:
-    #WIND
-    dr_out=lecture_grib(grib_list_total_wind_12,'WIND')
-    result = [calcul_par_station(x, y, nomstn, oaci) for x, y, nomstn, oaci in zip(coords_stations['LAT'], coords_stations['LON'],coords_stations['NOMSTN'],coords_stations['OACI'])]
-    df_wind = pd.concat(result,axis=0).sort_values('valid_time').reset_index()
-
-if grib_list_total_tmp_12:
-    #TMP
-    dr_out=lecture_grib(grib_list_total_tmp_12,'TMP')
-    result = [calcul_par_station(x, y, nomstn, oaci) for x, y, nomstn, oaci in zip(coords_stations['LAT'], coords_stations['LON'],coords_stations['NOMSTN'],coords_stations['OACI'])]
-    df_tmp = pd.concat(result,axis=0).sort_values('valid_time').reset_index()
-
-if grib_list_total_wdir_12:
-    #WDIR
-    print(grib_list_total_wdir_12)
-    dr_out=lecture_grib(grib_list_total_wdir_12,'WDIR')
-    result = [calcul_par_station(x, y, nomstn, oaci) for x, y, nomstn, oaci in zip(coords_stations['LAT'], coords_stations['LON'],coords_stations['NOMSTN'],coords_stations['OACI'])]
-    df_wdir = pd.concat(result,axis=0).sort_values('valid_time').reset_index()
-
-#Concatenation de toutes les previsions 
-df_final = pd.merge(df_wind, df_wdir, on=['valid_time','station'])
-
-df_final.to_csv(dateStr+'_wdir_tmp_12.csv')#mettre variable
-
-#Menage
-
+        
 def menage_grib():
     for f in grib_list_total_tmp_12:
         os.remove(f)#il ne reste que les idx après
@@ -143,8 +97,3 @@ def menage_grib():
 # chmod +x extract_grib_script.py  
 # /Users/caramelo/anaconda3/envs/test_xesmf/bin/python extract_grib_script.py
 #grib download
-import requests
-import urllib.request
-import time
-from bs4 import BeautifulSoup
-import os               
