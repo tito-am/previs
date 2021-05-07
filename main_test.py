@@ -25,7 +25,7 @@ print(date)
 
 #creation d'un folder pour tenir les grib
 
-parent_dir='/Users/caramelo/Documents/00_HQ/01_Prevision_Demande/scribe_download/gem/RDPS/GRIBS'
+parent_dir='/Users/caramelo/Documents/00_HQ/01_Prevision_Demande/scribe_download/gem/RDPS/GRIBS/'
 os.chdir(parent_dir)
 try:
     os.mkdir(d1)
@@ -34,12 +34,12 @@ except OSError as error:
 os.chdir(d1)
 #fonction de téléchargement
 
-cmc_download(date,d1,emission='00',variable_level='WIND_TGL_10')
-cmc_download(date,d1,emission='00',variable_level='TMP_TGL_2')
-cmc_download(date,d1,emission='00',variable_level='WDIR_TGL_10')
-cmc_download(date,d1,emission='00',variable_level='APCP_SFC_0')
-cmc_download(date,d1,emission='00',variable_level='TCDC_SFC_0')
-cmc_download(date,d1,emission='00',variable_level='DPT_TGL_2')#dewpoint temperature
+#cmc_download(date,d1,emission='00',variable_level='WIND_TGL_10',parent_dir=parent_dir)
+#cmc_download(date,d1,emission='00',variable_level='TMP_TGL_2',parent_dir=parent_dir)
+#cmc_download(date,d1,emission='00',variable_level='WDIR_TGL_10',parent_dir=parent_dir)
+#cmc_download(date,d1,emission='00',variable_level='APCP_SFC_0',parent_dir=parent_dir)
+#cmc_download(date,d1,emission='00',variable_level='TCDC_SFC_0',parent_dir=parent_dir)
+#cmc_download(date,d1,emission='00',variable_level='DPT_TGL_2',parent_dir=parent_dir)#dewpoint temperature
 
 #####################################
 #Traitement des données téléchargées#
@@ -53,23 +53,38 @@ for filename in os.listdir(folder):
     #print(filename)
     infilename = os.path.join(folder, filename)
     print(infilename)
-    if os.path.isfile(infilename):
-        for filename2 in os.listdir(infilename,filename2):
-            infilename = os.path.join(folder, filename)
-            print(infilename)
-            
-grib_list_total_wind_12=sorted(glob.glob('*_WIND_*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_wind_12)
-grib_list_total_tmp_12=sorted(glob.glob('*_TMP_*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_tmp_12)
-grib_list_total_wdir_12=sorted(glob.glob('*_WDIR_*.grib2'))#il faut regarder pour avoir l'heure d'émission
-print(grib_list_total_wdir_12)
+    x=glob.glob(infilename+"/*/")
+    list_stations_meteo=[]
+    coords_stations=pd.read_csv('/Users/caramelo/Documents/GitHub/cmc/Stations matrice scribe.csv')
+    for path in x:
+        print(path)
+        os.chdir(infilename+path.split(infilename)[1])
+        var=path.split('/')[-2]
+        dr_out=lecture_grib(glob.glob('*'+var+'*.grib2'),var)
+        result = [calcul_par_station(dr_out,x, y, nomstn, oaci) for x, y, nomstn, oaci in zip(coords_stations['LAT'], coords_stations['LON'],coords_stations['NOMSTN'],coords_stations['OACI'])] 
+        df = pd.concat(result,axis=0).sort_values('valid_time').reset_index().to_csv(var+'.csv')
+        print(type(df))
+        list_stations_meteo.append(df)
 
-coords_stations=pd.read_csv('/Users/caramelo/Documents/GitHub/cmc/Stations matrice scribe.csv')
+
+df_final = pd.concat(list_stations_meteo)
+df_final.to_csv('final.csv')
+#grib_list_total_wind_12=sorted(glob.glob('*_WIND_*.grib2'))#il faut regarder pour avoir l'heure d'émission
+#print(grib_list_total_wind_12)
+#grib_list_total_tmp_12=sorted(glob.glob('*_TMP_*.grib2'))#il faut regarder pour avoir l'heure d'émission
+#print(grib_list_total_tmp_12)
+#grib_list_total_wdir_12=sorted(glob.glob('*_WDIR_*.grib2'))#il faut regarder pour avoir l'heure d'émission
+#print(grib_list_total_wdir_12)
+
+#d = {}
+#for name in companies:
+#    d[name] = pd.DataFrame()
+
+
 
 #bloc pour voir si les fichiers sont présents
 
-if grib_list_total_wind_12:
+''' if grib_list_total_wind_12:
     #WIND
     dr_out=lecture_grib(grib_list_total_wind_12,'WIND')
     result = [calcul_par_station(dr_out,x, y, nomstn, oaci) for x, y, nomstn, oaci in zip(coords_stations['LAT'], coords_stations['LON'],coords_stations['NOMSTN'],coords_stations['OACI'])]
@@ -92,4 +107,4 @@ if grib_list_total_wdir_12:
 #df_final = pd.merge(df_wind, df_wdir, on=['valid_time','station'])
 
 #df_final.to_csv(dateStr+'_wdir_tmp_12.csv')#mettre variable
-df_wind.to_csv('test.csv')
+df_wind.to_csv('test.csv') '''

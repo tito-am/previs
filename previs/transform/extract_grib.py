@@ -8,6 +8,10 @@ import geopandas as gpd
 from distributed import Client
 import matplotlib.pyplot as plt
 from datetime import datetime
+import multiprocessing
+from dask.distributed import Client
+
+
 
 #Heure d'arrivée des modèles régionaux du CMC au 8 avril 2021 (00Z -4):
 #Standard time zone:	UTC/GMT -5 hours
@@ -33,23 +37,25 @@ from datetime import datetime
 
 
 def lecture_grib(grib_list_total,var_meteo):
-    ds=xr.open_mfdataset(grib_list_total,concat_dim='valid_time',engine='cfgrib',combine='nested',parallel=True,chunks={"x": -1, "y":-1})#ai-je besoin de faire les chunk?
+    #client = Client(n_workers=int(multiprocessing.cpu_count()))
+    ds=xr.open_mfdataset(grib_list_total,concat_dim='valid_time',engine='cfgrib',combine='nested',parallel=True,chunks={"x": -1, "y":-1},coords='minimal',compat='override')#ai-je besoin de faire les chunk?
+    
     #Faire un if pour le vent
     # Convert m/s to km/h
-    if var_meteo=='WIND':
+    if var_meteo=='WIND_TGL_10':
         si10 = ds.si10*3.6 
         # copy attributes to get nice figure labels
         si10.attrs = ds.si10.attrs
         si10.attrs["units"] = "km/h"#pas pareil que GRIB_units
         ds = si10.rename({'latitude': 'lat', 'longitude': 'lon'})
-    elif var_meteo=='TMP':
+    elif var_meteo=='TMP_TGL_2':
         # Convert to celsius
         t2m=ds.t2m-273.15 #passage en celsius
         # copy attributes to get nice figure labels and change Kelvin to Celsius
         t2m.attrs = ds.t2m.attrs
         t2m.attrs["units"] = "deg C"
         ds = t2m.rename({'latitude': 'lat', 'longitude': 'lon'})
-    elif var_meteo=='WDIR':
+    elif var_meteo=='WDIR_TGL_10':
         wdir10=ds.wdir10
         ds = wdir10.rename({'latitude': 'lat', 'longitude': 'lon'})
  
@@ -59,7 +65,7 @@ def lecture_grib(grib_list_total,var_meteo):
     regridder = xe.Regridder(ds, ds_out, 'bilinear')
     regridder
     dr_out = regridder(ds)
-    dr_out.where(dr_out>0).plot()
+    #dr_out.where(dr_out>0).plot()
     dr_out['lat'] = dr_out.lat[:,0].drop('lon')
     dr_out['lon'] = dr_out.lon[0,:].drop('lat')
     dr_out = dr_out.sortby(['x','y'])
