@@ -1,15 +1,4 @@
 #/Users/caramelo/anaconda3/envs/test_xesmf/bin/python
-import xarray as xr
-import xesmf as xe
-import pandas as pd
-import os
-import glob
-import geopandas as gpd
-from distributed import Client
-import matplotlib.pyplot as plt
-from datetime import datetime
-import multiprocessing
-from dask.distributed import Client
 
 
 
@@ -33,12 +22,13 @@ from dask.distributed import Client
 #client = Client(n_workers=2, threads_per_worker=2, memory_limit='1GB')
 #client #this is optional, it's good to have a dashboard to follow the computations
 
+import xesmf as xe
 
 
 
-def lecture_grib(grib_list_total,var_meteo):
-    #client = Client(n_workers=int(multiprocessing.cpu_count()))
-    ds=xr.open_mfdataset(grib_list_total,concat_dim='valid_time',engine='cfgrib',combine='nested',parallel=True,chunks={"x": -1, "y":-1},coords='minimal',compat='override')#ai-je besoin de faire les chunk?
+def lecture_grib(ds,var_meteo):
+    
+    
     
     #Faire un if pour le vent
     # Convert m/s to km/h
@@ -74,15 +64,18 @@ def lecture_grib(grib_list_total,var_meteo):
                             'lon':'longitude',
                             'lat':'latitude'})
     dr_out = dr_out.where(dr_out>0) # remplacer 0 par nan
+    
     return dr_out
     
 
-def calcul_par_station(dr_out,lat, lon, nomstn, oaci):    
-    varmeteo1d = dr_out.sel(latitude=lat, longitude=lon,method='nearest')
-    df = varmeteo1d.reset_coords(drop=True).to_dataframe()
-    df['nom_station'] = nomstn
-    df['station'] = oaci
-    return df
+#def calcul_par_station(dr_out,lat, lon, nomstn, oaci):    
+    
+
+#    varmeteo1d = dr_out.sel(latitude=lat, longitude=lon,method='nearest')
+#    df = varmeteo1d.reset_coords(drop=True).to_dataframe()
+#    df['nom_station'] = nomstn
+#    df['station'] = oaci
+#    return df
 
 def menage_grib():
     for f in grib_list_total_tmp_12:
