@@ -16,6 +16,8 @@ import datetime
 import multiprocessing
 import xarray as xr
 #import xesmf as xe
+import time
+start_time = time.time()
 
 
 def calcul_par_station(dr_out,lat, lon, nomstn, oaci):    
@@ -140,8 +142,8 @@ if __name__ == '__main__':
             #list_stations_meteo.append(df)
             
   
-            
-    
+    print("--- %s seconds ---" % (time.time() - start_time))
+ 
 
     #data.to_dataframe().to_csv('il roule externe du client.csv')
     #df_final = pd.concat(list_stations_meteo)
